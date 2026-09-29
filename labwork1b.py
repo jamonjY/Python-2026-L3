@@ -39,38 +39,47 @@ def listStudents(students):
         print(f"ID: {s['id']} | Name: {s['name']} | DoB: {s['dob']}")
 
 
+def get_student_mark(marks_db, course_id, student_id):
+    if course_id in marks_db:
+        if student_id in marks_db[course_id]:
+            return marks_db[course_id][student_id]
+    return "No mark"
+
+
 def inputMarks(courses, students, marks_db):
     listCourses(courses)
-    course_id = input("\nSelect a Course ID to enter marks: ")
+    selected_course = input("\nSelect a Course ID to begin with: ")
+
+    course_exists = False
+    for course in courses:
+        if course['id'] == selected_course:  # Fixed: course['id'] instead of courses['id']
+            course_exists = True
+            break
+
+    if course_exists == False:
+        print("Invalid course id!")
+        return 
     
-    # Check if valid course ID
-    valid_course = any(c['id'] == course_id for c in courses)
-    if not valid_course:
-        print("Invalid Course ID!")
-        return
-
-    if course_id not in marks_db:
-        marks_db[course_id] = {}
-
-    print(f"\nEntering marks for course: {course_id}")
+    if selected_course not in marks_db:
+        marks_db[selected_course] = {}
+    
     for student in students:
-        mark = float(input(f"Enter mark for student {student['name']} (ID: {student['id']}): "))
-        marks_db[course_id][student['id']] = mark
+        s_id = student['id']
+        s_name = student['name']
+        mark = float(input(f"Enter mark for {s_name} (ID: {s_id}): "))
+        marks_db[selected_course][s_id] = mark
 
 
 def showStudentMarks(courses, students, marks_db):
     listCourses(courses)
-    course_id = input("\nSelect a Course ID to view marks: ")
-    
-    if course_id not in marks_db or not marks_db[course_id]:
-        print("No marks recorded for this course yet!")
-        return
+    selected_course = input("\nSelect a Course ID to view marks: ").strip()
 
-    print(f"\n--- Marks for Course ID: {course_id} ---")
+    print(f"\n--- Marks for Course ID: {selected_course} ---")
     for student in students:
-        sid = student['id']
-        if sid in marks_db[course_id]:
-            print(f"Student: {student['name']} (ID: {sid}) | Mark: {marks_db[course_id][sid]}")
+        s_id = student['id']
+        s_name = student['name']
+        mark = get_student_mark(marks_db, selected_course, s_id)
+        print(f"Student: {s_name} (ID: {s_id}) | Mark: {mark}")
 
 
 def main():
@@ -79,6 +88,7 @@ def main():
     marks_db = {}  
 
     while True:
+        print("\n=== Menu ===")
         print("1. List Students")
         print("2. List Courses")
         print("3. Input Marks for a Course")
@@ -100,7 +110,5 @@ def main():
             break
         else:
             print("Invalid choice, try again.")
-            
-            
-            
+
 main()
